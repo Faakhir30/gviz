@@ -4,6 +4,7 @@ import VisGraph, {
     Options,
   } from 'react-vis-graph-wrapper';
   
+  
 export default function TsGraph() {
     const graph: GraphData = {
       nodes: [
