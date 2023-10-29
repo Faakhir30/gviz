@@ -13,7 +13,7 @@ export async function GET(req: Request, res: NextResponse) {
   let nodesData: any = {};
   for (const tableName of tableNames) {
     nodesData[tableName] = await query({
-      query: `select * from ${tableName} limit 10`,
+      query: `select * from ${tableName}`,
     });
   }
 
