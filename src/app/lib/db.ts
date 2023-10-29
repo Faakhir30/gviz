@@ -1,23 +1,23 @@
 import mysql from "mysql2/promise";
 interface QueryParams {
   query: string;
-  params?: any[];
+  values?: any[];
 }
-export async function query({ query, params }: QueryParams) {
+export async function query({ query, values }: QueryParams) {
   try {
     const db = await mysql.createConnection({
       host: "localhost",
-      database: "sakila",
-      //   port: 8889,
+      database: "gviz0",
       user: "root",
       password: "12312312",
       // socketPath: "/var/run/mysqld/mysqld.sock",,
     });
 
-    const [results] = await db.execute(query, params);
-    db.end();
+    const [results] = await db.execute(query, values);
+    await db.end();
     return results;
   } catch (error) {
     console.log("\n\n\n\nerror:asd  ", error);
+    throw error;
   }
 }
