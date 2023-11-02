@@ -5,6 +5,7 @@ import { query } from "./lib/db";
 import { generateColors } from "./utills/colors";
 
 export default function Home() {
+  const [curOutput, setCurOutput] = useState('');
   const [curNodes, setCurNodes] = useState<any[]>([]);
   const [curEdges, setCurEdges] = useState<any[]>([]);
   async function apicalls() {
@@ -17,10 +18,22 @@ export default function Home() {
   useEffect(() => {
     apicalls();
   }, []);
-  console.log(curEdges, curNodes)
+  console.log(curEdges, curNodes);
   return (
-    <main className="flex bg-black h-screen p-0 flex-col items-center justify-between">
-      <TsGraph nodes={curNodes} edges={curEdges} />
+    <main className="bg-primary-medium-dark">
+      <div className="flex w-full h-screen p-0 justify-center">
+        <div className="w-70">
+          <div className=" h-20">input section</div>
+
+          <div className="bg-primary-dark" style={{ height: "85vh" }}>
+            <TsGraph setCurOutput={setCurOutput} nodes={curNodes} edges={curEdges} />
+          </div>
+        </div>
+        <div className="w-60">
+            OUtput
+            {curOutput}
+        </div>
+      </div>
     </main>
   );
 }

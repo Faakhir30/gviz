@@ -1,0 +1,43 @@
+-- create database gviz0;
+-- use gviz0;
+-- create table Teacher(
+--  id int primary key auto_increment,
+--  name varchar(50)
+--  );
+-- create table Class(
+--   name varchar(30) primary key,
+--   fid int,
+--   foreign key(fid) references Teacher(id)
+--   );
+-- create table Student(
+--  id int primary key auto_increment,
+--  name varchar(50)
+--  );
+-- create table Enrolled(
+--       sid int,
+--       cname varchar(50),
+--       foreign key (sid) references Student(id),
+--       foreign key (cname) references Class(name)
+-- );
+
+-- insert into Teacher values (id, "shams");
+-- insert into Teacher values (id, "sadiq");
+-- insert into Teacher values (id, "saed");
+-- insert into Teacher values (id, "f");
+
+-- insert into Class values ("LA", (select id from Teacher where name="saed"));
+-- insert into Class values ("DB", (select id from Teacher where name="shams"));
+-- insert into Class values ("DSA", (select id from Teacher where name="f"));
+-- insert into Class values ("COAL", (select id from Teacher where name="sadiq"));
+
+-- insert into Student values(id, "faakhir");
+-- insert into Student values(id, "moiz");
+-- insert into Student values(id, "lemon");
+-- insert into Student values(id, "mash");
+
+-- insert into Enrolled values
+--           ((select id from Student where name="faakhir"), "LA"),
+-- 		  ((select id from Student where name="faakhir"), "DB"),
+-- 		  ((select id from Student where name="faakhir"), "DSA"),
+-- 		  ((select id from Student where name="faakhir"), "COAL")
+
