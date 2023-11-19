@@ -52,6 +52,7 @@ module.exports = {
               'error-dark': 'hsl(3, 80%, 20%)',
               'error-dark-trasparent': 'hsla(3, 80%, 50%, 0.3)'
           },
+
           boxShadow: {
               dropdown: '-5px 10px 20px hsla(175, 74%, 70%, 0.5)'
           }

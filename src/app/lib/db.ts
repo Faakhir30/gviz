@@ -9,8 +9,7 @@ export async function query({ query, values }: QueryParams) {
       host: "localhost",
       database: "gviz0",
       user: "root",
-      password: "12312312",
-      // socketPath: "/var/run/mysqld/mysqld.sock",,
+      password: "1234",
     });
 
     const [results] = await db.execute(query, values);

@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import TsGraph from "./(_components_)/tsgraph";
-import { query } from "./lib/db";
-import { generateColors } from "./utills/colors";
 
 export default function Home() {
   const [curOutput, setCurOutput] = useState('');
