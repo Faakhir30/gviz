@@ -34,6 +34,7 @@ export default function TsGraph({
     edges: {
       color: "#fff",
     },
+    autoResize: true,
   };
 
   const events: GraphEvents = {
@@ -50,7 +51,7 @@ export default function TsGraph({
   };
   return (
     <VisGraph
-      style={{ width: "100%", height: "100%", zIndex: 1 }}
+      style={{ width: "100%", height: "100%", zIndex: 1 , border: "1px solid #fff"}}
       graph={graph}
       options={options}
       events={events}

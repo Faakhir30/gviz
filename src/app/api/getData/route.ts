@@ -76,6 +76,19 @@ export async function GET(req: Request, res: NextResponse) {
   // Wait for all promises to complete
   await Promise.all(promises);
 
+  // Add reverse edges
+  edges.map((edge:any) => {
+    return {
+        from: edge.from,
+        to: edge.to
+    }
+  });
+  edges=edges.concat(edges.map((edge:any) => {
+    return {
+        from: edge.to,
+        to: edge.from
+    }
+  }));
   let graphData = {
     nodes,
     edges: edges,
