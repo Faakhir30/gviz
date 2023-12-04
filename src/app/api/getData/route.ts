@@ -18,13 +18,14 @@ export async function GET(req: Request, res: NextResponse) {
   }
 
   let nodes: any = [];
+  let assignedColrs: any = {};
   for (const tableName of Object.keys(nodesData)) {
     nodesData[tableName].map((node: any) => {
       nodes.push({
         id: JSON.stringify(node, Object.keys(node).sort()),
         label: tableName,
         title: JSON.stringify(node),
-        color: generateColors(tableName),
+        color: '#aaa',
       });
     });
   }
