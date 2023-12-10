@@ -51,7 +51,7 @@ export default function TsGraph({
   };
   return (
     <VisGraph
-      style={{ width: "100%", height: "100%", zIndex: 1 , border: "1px solid #fff"}}
+      style={{ width: "100%", height: "98%", zIndex: 1 , border: "1px solid #fff"}}
       graph={graph}
       options={options}
       events={events}

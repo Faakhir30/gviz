@@ -15,12 +15,12 @@ module.exports = {
               },
               progressBar: {
                   '0%': { width: '0%' },
-                  '100%': { width: '100%' }
+                  '70%': { width: '70%' }
               }
           },
           animation: {
               spin: 'spin 300ms ease-in-out',
-              progressBar: 'progressBar 1s ease-in-out'
+              progressBar: 'progressBar 0.1s ease-in-out'
           },
           colors: {
               //Site theme

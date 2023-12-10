@@ -5,15 +5,15 @@ interface QueryParams {
 }
 export async function query({ query, values }: QueryParams) {
   try {
-    const db = await mysql.createConnection({
+    const db = await mysql?.createConnection({
       host: "localhost",
       database: "gviz0",
       user: "root",
       password: "1234",
     });
 
-    const [results] = await db.execute(query, values);
-    await db.end();
+    const [results] = await db?.execute(query, values);
+    await db?.end();
     return results;
   } catch (error) {
     console.log("\n\n\n\nerror:asd  ", error);

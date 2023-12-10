@@ -1,5 +1,4 @@
 import { query } from "@/app/lib/db";
-import { generateColors } from "@/app/utills/colors";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, res: NextResponse) {
@@ -18,8 +17,7 @@ export async function GET(req: Request, res: NextResponse) {
   }
 
   let nodes: any = [];
-  let assignedColrs: any = {};
-  for (const tableName of Object.keys(nodesData)) {
+ for (const tableName of Object.keys(nodesData)) {
     nodesData[tableName].map((node: any) => {
       nodes.push({
         id: JSON.stringify(node, Object.keys(node).sort()),
@@ -93,7 +91,7 @@ export async function GET(req: Request, res: NextResponse) {
   let graphData = {
     nodes,
     edges: edges,
+    data:nodesData
   };
-
   return NextResponse.json(graphData);
 }
