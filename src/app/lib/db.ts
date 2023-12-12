@@ -1,22 +1,28 @@
 import mysql from "mysql2/promise";
+
+// Create a connection pool
+const pool = mysql.createPool({
+  host: "localhost",
+  database: "gviz0",
+  user: "root",
+  password: "1234",
+});
+
 interface QueryParams {
   query: string;
   values?: any[];
 }
-export async function query({ query, values }: QueryParams) {
-  try {
-    const db = await mysql?.createConnection({
-      host: "localhost",
-      database: "gviz0",
-      user: "root",
-      password: "1234",
-    });
 
-    const [results] = await db?.execute(query, values);
-    await db?.end();
+export async function query({ query, values }: QueryParams) {
+  const connection = await pool.getConnection();
+  try {
+    const [results] = await connection.execute(query, values);
     return results;
   } catch (error) {
-    console.log("\n\n\n\nerror:asd  ", error);
+    console.error("Error executing query:", query);
+    console.error("Error details:", error);
     throw error;
+  } finally {
+    connection.release(); // Release the connection back to the pool
   }
 }

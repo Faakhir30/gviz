@@ -38,6 +38,9 @@ dependencies:
   react-graph-vis:
     specifier: ^1.0.7
     version: 1.0.7(@egjs/hammerjs@2.0.17)(component-emitter@1.3.0)(keycharm@0.4.0)(react@18.2.0)(vis-util@5.0.5)
+  react-icons:
+    specifier: ^4.12.0
+    version: 4.12.0(react@18.2.0)
   react-vis-graph-wrapper:
     specifier: ^0.1.3
     version: 0.1.3(@egjs/hammerjs@2.0.17)(component-emitter@1.3.0)(keycharm@0.4.0)(react@18.2.0)(uuid@9.0.1)(vis-util@5.0.5)
@@ -2472,6 +2475,14 @@ packages:
       - component-emitter
       - keycharm
       - vis-util
+    dev: false
+
+  /react-icons@4.12.0(react@18.2.0):
+    resolution: {integrity: sha512-IBaDuHiShdZqmfc/TwHu6+d6k2ltNCf3AszxNmjJc1KUfXdEeRJOKyNvLmAHaarhzGmTSVygNdyu8/opXv2gaw==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react-is@16.13.1:

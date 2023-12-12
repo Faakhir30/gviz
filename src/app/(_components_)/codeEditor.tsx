@@ -3,15 +3,12 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-mysql";
 import "ace-builds/src-noconflict/theme-twilight";
 import "ace-builds/src-noconflict/ext-language_tools";
-
-const CodeEditor = () => {
-    const [value, setValue] = React.useState("");
-    const onChange = React.useCallback((val:any, viewUpdate:any) => {
-      console.log('val:', val);
-      setValue(val);
-    }, []);
+interface CodeEditorProps {
+  value?: string;
+  onChange?: any;
+}
+const CodeEditor = ({value, onChange}:CodeEditorProps) => {
     const onloadEditor = React.useCallback((editor:any) => {
-      console.log('editor:', editor);
     }, []);
     return (
         <AceEditor
@@ -30,7 +27,7 @@ const CodeEditor = () => {
         setOptions={{
         enableBasicAutocompletion: true,
         enableLiveAutocompletion: true,
-        enableSnippets: false,
+        enableSnippets: true,
         showLineNumbers: true,
         tabSize: 2,
         }}/>

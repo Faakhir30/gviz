@@ -6,6 +6,8 @@ import { delay } from "./utills/delay";
 import CodeEditor from "./(_components_)/codeEditor";
 import { Node, Edge } from "react-vis-graph-wrapper";
 import Table from "./(_components_)/table";
+import { IoIosClose } from "react-icons/io";
+import { query } from "./lib/db";
 export default function Home() {
   const [curOutput, setCurOutput] = useState("");
   const [curNodes, setCurNodes] = useState<Node[]>([]);
@@ -14,12 +16,18 @@ export default function Home() {
   const [defaultNodes, setDefaultNodes] = useState<any[]>([]);
   const [defaultEdges, setDefaultEdges] = useState<any[]>([]);
   const [sideView, setSideView] = useState(false);
-  const showSideView = () => {
+  const [state, setState] = useState(1);
+  const [queryy, setQuery] = useState("");
+  const showStart = () => {
+    setState(0);
     setSideView(!sideView);
   };
-
-  const [start, setStart] = useState<any>({ id: '{"id":1,"name":"faakhir"}' });
-  const [end, setEnd] = useState<any>({ id: '{"id":2,"name":"sadiq"}' });
+  const showEnd = () => {
+    setState(1);
+    setSideView(!sideView);
+  };
+  const [start, setStart] = useState<any>('{"id":1,"name":"faakhir"}');
+  const [end, setEnd] = useState<any>('{"id":2,"name":"sadiq"}');
   async function apicalls() {
     const data = await (
       await fetch("http://localhost:3000/api/getData")
@@ -27,17 +35,45 @@ export default function Home() {
     setData(data.data);
     setCurNodes(data.nodes);
     setCurEdges(data.edges);
-    console.log(data.data);
     setDefaultNodes(data.nodes);
     setDefaultEdges(data.edges);
   }
   useEffect(() => {
     apicalls();
   }, []);
-
+  useEffect(() => {
+    curNodes.find((n) => n.id === start) &&
+      setCurNodes(
+        curNodes.map((n) =>
+          n.id === start
+            ? { ...n, color: "#fff" }
+            : { ...n, color: n.color === "#444" ? "#444" : "#aaa" }
+        )
+      );
+  }, [start]);
+  useEffect(() => {
+    curNodes.find((n) => n.id === end) &&
+      setCurNodes(
+        curNodes.map((n) =>
+          n.id === end
+            ? { ...n, color: "#444" }
+            : { ...n, color: n.color === "#fff" ? "#fff" : "#aaa" }
+        )
+      );
+  }, [end]);
   const visualizeDijkstra = useCallback(async () => {
-    let nodes = [start];
-    let visited: any[] = [start.id];
+    const firstNode = curNodes.find((n) => n.id === start);
+    if (!firstNode) {
+      alert("start node not found");
+      return;
+    }
+    setCurEdges(
+      curEdges.map((e) => {
+        return { ...e, color: "#aaa" };
+      })
+    );
+    let nodes = [firstNode];
+    let visited: any[] = [start];
     setCurNodes(
       curNodes.map((node) =>
         node.id === start.id ? { ...node, color: "#fff" } : node
@@ -46,7 +82,7 @@ export default function Home() {
     while (nodes.length > 0) {
       const node = nodes.shift();
       const edges = curEdges.filter(
-        (e) => e.from === node.id && !visited.includes(e.to)
+        (e) => e.from === node?.id && !visited.includes(e.to)
       );
       for await (const edge of edges) {
         const toNode = curNodes.find((n) => n.id === edge.to);
@@ -64,7 +100,7 @@ export default function Home() {
         );
         visited.push(toNode.id);
         await delay(1000);
-        if (toNode.id === end.id) {
+        if (toNode.id === end) {
           setCurNodes(
             curNodes.map((n) =>
               n.id === toNode.id ? { ...n, color: "green" } : n
@@ -87,15 +123,10 @@ export default function Home() {
         }
         nodes.push(toNode);
       }
-      console.log("nodes", nodes);
     }
-  }, [curEdges, curNodes]);
+  }, [curEdges, curNodes, end, start]);
   const visualizeCorrectDijkstraPath = async (initialNodes: any) => {
-    const path = dijkstra(
-      { nodes: curNodes, edges: curEdges },
-      '{"id":1,"name":"faakhir"}',
-      '{"id":2,"name":"sadiq"}'
-    );
+    const path = dijkstra({ nodes: curNodes, edges: curEdges }, start, end);
     let i = 0;
     for await (const node_id of path) {
       setCurNodes(
@@ -116,12 +147,31 @@ export default function Home() {
     setCurNodes(initialNodes);
     setCurEdges(defaultEdges);
   };
+  const runQuery = async () => {
+    try{
+    const res = await fetch("http://localhost:3000/api/runQuery", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({query:queryy}),
+    });
+    const p=await res.json()
+    console.log(p)
+    await apicalls();
+    }catch(e){
+      console.log(e)
+    }
+  };
   return (
     <main className="bg-primary-medium-dark">
       <div className="flex w-full h-screen p-0 ">
         <div className={`w-70 ${sideView && "opacity-50"}`}>
           <div className="h-20 overflow-y-hidden">
-            <CodeEditor />
+            <CodeEditor 
+              value={queryy}
+              onChange={(val:any) => setQuery(val)}
+            />
           </div>
 
           <div className="bg-primary-dark" style={{ height: "85vh" }}>
@@ -137,22 +187,37 @@ export default function Home() {
           <>
             <div className="h-screen">
               <div className="h-1/6">
-                <button onClick={showSideView}>Select Nodes</button>
+                <button className="p-2 bg-grey border-2 m-4" onClick={runQuery}>Run Query</button>
+                <button className="p-2 bg-grey border-2 m-4" onClick={showEnd}>Select End</button>
+                <button className="p-2 bg-grey border-2 m-4" onClick={showStart}>Select Start</button>
               </div>
-              <div className="h-auto">{curOutput}</div>
             </div>
-            <button onClick={showSideView}>Select Nodes</button>
             {sideView && data && (
-              <div className="absolute top-0 right-0 h-screen w-[70vw] animate-progressBar bg-primary-medium-dark">
+              <div className="absolute max-h-screen overflow-auto top-0 right-0 h-screen w-[70vw] animate-progressBar bg-primary-medium-dark">
+                <button
+                  className=" text-5xl"
+                  onClick={() => setSideView(false)}
+                >
+                  <IoIosClose />
+                </button>
+                <h1 className="font-extrabold text-center">TABLES</h1>
                 {Object.keys(data).map((table) => {
-                 return <div key={table}>
-                    <Table
-                      headers={Object.keys(data[table][0])}
-                      data={data[table].map((row: any) => Object.values(row))}
-                      displayCheckboxes={false}
-                      className=" w-5/6 text-left text-sm"
-                    />
-                  </div>;
+                  return (
+                    <div key={table}>
+                      <Table
+                        title={table}
+                        start={start}
+                        end={end}
+                        setEnd={setEnd}
+                        setStart={setStart}
+                        state={state}
+                        headers={Object.keys(data[table][0])}
+                        data={data[table].map((row: any) => Object.values(row))}
+                        displayCheckboxes={false}
+                        className=" w-5/6 text-left text-sm"
+                      />
+                    </div>
+                  );
                 })}
               </div>
             )}
