@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { delay } from "../utills/delay";
 import { SiGraphql } from "react-icons/si";
 
@@ -23,19 +23,17 @@ export default function Connect() {
       body: JSON.stringify({ query: "show tables", poolInfo:data }),
     });
     const resdata = await res.json();
-    console.log(resdata)
-    if (resdata.error) {
-      toast.error(resdata.error);
+    if (resdata.status ==28000  || resdata.errorMsg) {
+      toast.error(resdata.errorMsg);
       return;
     }
     toast.success("Connected!");
     await delay(1000);
-    // router.push("/");
+    router.push("/");
   };
   return (
     <div className=" bg-primary-medium-light h-screen">
       {/* form for database connection */}
-      <Toaster />
       <div className="flex flex-col items-center justify-center h-full">
         <div className="flex flex-col items-center justify-center bg-white p-8 rounded-lg shadow-lg">
           <div className="flex font-extrabold text-4xl text-gray-800">

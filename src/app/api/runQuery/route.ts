@@ -14,7 +14,7 @@ interface PoolConect {
   user: string;
   password: string;
 }
-export async function query({ query, values, poolInfo }: QueryParams) {
+async function query({ query, values, poolInfo }: QueryParams) {
     let pool
     if(poolInfo){
         pool = mysql.createPool(poolInfo);
@@ -42,7 +42,7 @@ export async function query({ query, values, poolInfo }: QueryParams) {
 export async function POST(req: NextRequest, res: NextResponse) {
     const body:any = await req.json();
     try{
-        const ress = await query({query: body["query"].replace("\n", " ")});
+        const ress = await query({query: body["query"].replace("\n", " "), poolInfo: body["poolInfo"]});
         console.log("ress: ", ress);
         return NextResponse.json({data:ress});
 

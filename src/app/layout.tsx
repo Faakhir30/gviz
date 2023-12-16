@@ -1,3 +1,4 @@
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import type { Metadata } from "next";
 // import { Inter } from "next/font/google";
@@ -18,6 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={"inter.className"}>
         <div className="min-w-full min-h-screen">
+          <Toaster />
           <main className="bg-primary-medium-light">{children}</main>
         </div>
       </body>

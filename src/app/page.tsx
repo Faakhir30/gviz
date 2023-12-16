@@ -6,7 +6,7 @@ import { delay } from "./utills/delay";
 import CodeEditor from "./(_components_)/codeEditor";
 import { Node, Edge } from "react-vis-graph-wrapper";
 import Table from "./(_components_)/table";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { IoIosClose } from "react-icons/io";
 import { SiGraphql } from "react-icons/si";
 import { EdgeColor, EndColor, NodeColor, SelectColor, StartColor } from "./utills/constants";
@@ -233,7 +233,6 @@ export default function Home() {
   };
   return (
       <div className="flex flex-col w-full h-screen p-0 ">
-        <Toaster />
         <nav className="border-b-2 border-slate-600 bg-primary-light flex h-fit justify-between items-center">
           <div className="flex text-3xl justify-center font-extrabold text-slate-600 items-center">
             <SiGraphql className="m-2" />
