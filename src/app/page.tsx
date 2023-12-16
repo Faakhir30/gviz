@@ -232,7 +232,6 @@ export default function Home() {
     }
   };
   return (
-    <main className="bg-primary-medium-light">
       <div className="flex flex-col w-full h-screen p-0 ">
         <Toaster />
         <nav className="border-b-2 border-slate-600 bg-primary-light flex h-fit justify-between items-center">
@@ -324,6 +323,5 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </main>
   );
 }
