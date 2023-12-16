@@ -8,7 +8,9 @@ export async function GET(req: Request, res: NextResponse) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ query: "show tables" }),
-      }).then((res) => res.json());
+      }).then((res) => res.json())
+      .catch((err) => console.log(JSON.stringify(err)))
+      ;
   const tables = tablesQ.data
   let tableNames = [];
   if (tables) {
@@ -26,7 +28,9 @@ export async function GET(req: Request, res: NextResponse) {
         body: JSON.stringify({
           query: `select * from ${tableName}`,
           }),
-      }).then((res) => res.json());      
+      }).then((res) => res.json())
+      .catch((err) => console.log(JSON.stringify(err)))
+
       nodesData[tableName]=d.data;
   }
 
@@ -50,7 +54,9 @@ export async function GET(req: Request, res: NextResponse) {
           query: `SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = 'gviz0' AND REFERENCED_TABLE_NAME IS NOT NULL;`,
 
          }),
-      }).then((res) => res.json());
+      }).then((res) => res.json())
+      .catch((err) => console.log(JSON.stringify(err)))
+
   const edgesData = edgesDataQ.data
   let edges: any = [];
 
