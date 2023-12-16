@@ -9,6 +9,7 @@ import Table from "./(_components_)/table";
 import toast, { Toaster } from "react-hot-toast";
 import { IoIosClose } from "react-icons/io";
 import { SiGraphql } from "react-icons/si";
+import { EdgeColor, EndColor, NodeColor, SelectColor, StartColor } from "./utills/constants";
 
 export default function Home() {
   const [curOutput, setCurOutput] = useState("");
@@ -17,9 +18,25 @@ export default function Home() {
   const [curEdges, setCurEdges] = useState<Edge[]>([]);
   const [defaultNodes, setDefaultNodes] = useState<any[]>([]);
   const [defaultEdges, setDefaultEdges] = useState<any[]>([]);
+  const [otherEdges, setOtherEdges] = useState<Edge[]>([]);
   const [sideView, setSideView] = useState(false);
   const [state, setState] = useState(1);
   const [queryy, setQuery] = useState("");
+  const [isDirected, setIsDirected] = useState(false);
+  const [visitedCount, setVisitedCount] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const changeDirected = useCallback(async () => {
+    await clearColors();
+    const edges = curEdges;
+    setCurEdges(otherEdges);
+    setOtherEdges(edges);
+  }, [curEdges]);
+  useEffect(() => {
+    async function change() {
+      await changeDirected();
+    }
+    change();
+  }, [isDirected]);
   const showStart = () => {
     setState(0);
     setSideView(!sideView);
@@ -37,6 +54,7 @@ export default function Home() {
     setData(data.data);
     setCurNodes(data.nodes);
     setCurEdges(data.edges);
+    setOtherEdges(data.undirectedEdges);
     setDefaultNodes(data.nodes);
     setDefaultEdges(data.edges);
   }
@@ -48,8 +66,8 @@ export default function Home() {
       setCurNodes(
         curNodes.map((n) =>
           n.id === start
-            ? { ...n, color: "#fff" }
-            : { ...n, color: n.color === "#444" ? "#444" : "#aaa" }
+            ? { ...n, color: StartColor }
+            : { ...n, color: n.color === StartColor ? NodeColor : n.color }
         )
       );
   }, [start]);
@@ -58,38 +76,39 @@ export default function Home() {
       setCurNodes(
         curNodes.map((n) =>
           n.id === end
-            ? { ...n, color: "#444" }
-            : { ...n, color: n.color === "#fff" ? "#fff" : "#aaa" }
+            ? { ...n, color: EndColor }
+            : { ...n, color: n.color === EndColor ? NodeColor : n.color }
         )
       );
   }, [end]);
   const clearColors = useCallback(async () => {
     setCurNodes(
       curNodes.map((n) =>
-        n.color === "#fff" || n.color === "#444"
+        n.color === StartColor || n.color === EndColor
           ? { ...n, color: n.color }
-          : { ...n, color: "#aaa" }
+          : { ...n, color: NodeColor }
       )
     );
     setCurEdges(
       curEdges.map((e) => {
-        return { ...e, color: "#aaa" };
+        return { ...e, color: EdgeColor };
       })
     );
+    setCorrectCount(0);
+    setVisitedCount(0);
   }, [curEdges, curNodes]);
 
   const visualizeDijkstra = useCallback(async () => {
     await clearColors();
     const firstNode = curNodes.find((n) => n.id === start);
     if (!firstNode) {
-      alert("start node not found");
+      toast.error("start node not found");
       return;
     }
-    setCurEdges(
-      curEdges.map((e) => {
-        return { ...e, color: "#aaa" };
-      })
-    );
+    if (!end) {
+      toast.error("end node not found");
+      return;
+    }
     let nodes = [firstNode];
     let visited: any[] = [start];
     setCurNodes(
@@ -108,8 +127,9 @@ export default function Home() {
         setCurNodes(
           curNodes.map((n) => (n.id === toNode.id ? { ...n, color: "red" } : n))
         );
-        setCurEdges(
-          curEdges.map((e) =>
+        setVisitedCount((prev) => prev + 1);
+        setCurEdges((edges) =>
+          edges.map((e) =>
             (e.to === edge.to && e.from === edge.from) ||
             (e.to === edge.from && e.from === edge.to)
               ? { ...e, color: "red" }
@@ -157,8 +177,9 @@ export default function Home() {
       setCurNodes(
         curNodes.map((n) => (n?.id === node_id ? { ...n, color: "green" } : n))
       );
-      setCurEdges(
-        curEdges.map((e) =>
+      setCorrectCount((prev) => prev + 1);
+      setCurEdges((edges) =>
+        edges.map((e) =>
           i > 0 &&
           ((e.to === node_id && e.from === path[i - 1]) ||
             (e.to === path[i - 1] && e.from === node_id))
@@ -170,7 +191,7 @@ export default function Home() {
       i++;
     }
     setCurNodes(initialNodes);
-    setCurEdges(defaultEdges);
+    // setCurEdges(defaultEdges);
   };
   const runQuery = async () => {
     try {
@@ -184,6 +205,24 @@ export default function Home() {
       const p = await res.json();
       if (p.errorMsg) {
         toast.error(p.errorMsg);
+        return;
+      }
+      if (queryy.trim().toLowerCase().startsWith("select")) {
+        if (p.data.length === 0) {
+          toast.error("No data found");
+          return;
+        } else {
+          const selectedIds = p.data?.map((d: any) =>
+            JSON.stringify(d, Object.keys(d).sort())
+          );
+          setCurNodes((nodes) =>
+            nodes.map((n) => ({
+              ...n,
+              color: selectedIds?.includes(n.id) ? SelectColor : NodeColor,
+            }))
+          );
+        }
+        toast.success("Query Executed");
         return;
       }
       await apicalls();
@@ -203,9 +242,9 @@ export default function Home() {
           </div>
           <button
             className="rounded-lg bg-slate-600 p-2 border-2 m-4"
-            onClick={showEnd}
+            onClick={clearColors}
           >
-            Select End
+            Reset
           </button>
           <button
             className="rounded-lg bg-slate-600 p-2 border-2 m-4"
@@ -213,6 +252,19 @@ export default function Home() {
           >
             Select Start
           </button>
+          <button
+            className="rounded-lg bg-slate-600 p-2 border-2 m-4"
+            onClick={showEnd}
+          >
+            Select End
+          </button>
+          <div
+            onClick={() => setIsDirected(!isDirected)}
+            className="cursor-pointer flex bg-slate-600 p-2 m-4 border-2 rounded-lg"
+          >
+            <h4>Directed</h4>
+            <input type="checkbox" className="mx-2" checked={isDirected} />
+          </div>
           <button
             className="rounded-lg bg-slate-600 p-2 border-2 m-4"
             onClick={visualizeDijkstra}
@@ -250,12 +302,16 @@ export default function Home() {
           )}
         </div>
         <div className={`grid h-full grid-cols-4 ${sideView && "opacity-50"}`}>
-          <div className="col-span-3">
+          <div className="relative col-span-3">
             <TsGraph
               setCurOutput={setCurOutput}
               nodes={curNodes}
               edges={curEdges}
             />
+            <div className="absolute top-2 left-2 text-primary-dark">
+              <h3>Nodes Visited: {visitedCount}</h3>
+              <h3>Correct Path Length: {correctCount}</h3>
+            </div>
           </div>
           <div className="col-span-1 border-l-2 border-slate-600">
             <CodeEditor value={queryy} onChange={setQuery} />

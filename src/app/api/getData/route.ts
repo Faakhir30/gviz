@@ -1,4 +1,5 @@
 import { query } from "@/app/lib/db";
+import { EdgeColor, NodeColor } from "@/app/utills/constants";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, res: NextResponse) {
@@ -23,7 +24,7 @@ export async function GET(req: Request, res: NextResponse) {
         id: JSON.stringify(node, Object.keys(node).sort()),
         label: tableName,
         title: JSON.stringify(node),
-        color: '#aaa',
+        color: NodeColor,
       });
     });
   }
@@ -58,6 +59,9 @@ export async function GET(req: Request, res: NextResponse) {
                 matchingNode,
                 Object.keys(matchingNode).sort()
               ),
+              color: EdgeColor,
+              width: 2,
+
             }))
           );
         }
@@ -74,24 +78,22 @@ export async function GET(req: Request, res: NextResponse) {
 
   // Wait for all promises to complete
   await Promise.all(promises);
-
+  const undirectedEdges = JSON.parse(JSON.stringify(edges))
   // Add reverse edges
-  edges.map((edge:any) => {
-    return {
-        from: edge.from,
-        to: edge.to
-    }
-  });
   edges=edges.concat(edges.map((edge:any) => {
     return {
         from: edge.to,
-        to: edge.from
+        to: edge.from,
+        color: EdgeColor,
+        width: 2,
+
     }
   }));
   let graphData = {
     nodes,
     edges: edges,
-    data:nodesData
+    data:nodesData,
+    undirectedEdges
   };
   return NextResponse.json(graphData);
 }

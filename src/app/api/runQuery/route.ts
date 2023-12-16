@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest, res: NextResponse) {
     const body:any = await req.json();
     try{
-        const ress = await query({query: body["query"]});
+        const ress = await query({query: body["query"].replace("\n", " ")});
         console.log("ress: ", ress);
-        return NextResponse.json(ress);
+        return NextResponse.json({data:ress});
 
     }catch(error:any){
         console.error("Error details:", error);
