@@ -11,7 +11,7 @@ export async function GET(req: Request, res: NextResponse) {
       }).then((res) => res.json())
       .catch((err) => console.log(JSON.stringify(err)))
       ;
-  const tables = tablesQ.data
+  const tables = tablesQ?.data || [];
   let tableNames = [];
   if (tables) {
     tableNames = tables.map((table: any) => Object.values(table)[0]);
@@ -31,7 +31,7 @@ export async function GET(req: Request, res: NextResponse) {
       }).then((res) => res.json())
       .catch((err) => console.log(JSON.stringify(err)))
 
-      nodesData[tableName]=d.data;
+      nodesData[tableName]=d?.data || [];
   }
 
   let nodes: any = [];
@@ -57,7 +57,7 @@ export async function GET(req: Request, res: NextResponse) {
       }).then((res) => res.json())
       .catch((err) => console.log(JSON.stringify(err)))
 
-  const edgesData = edgesDataQ.data
+  const edgesData = edgesDataQ?.data || []
   let edges: any = [];
 
   // Define a helper function to get edges for a specific node
