@@ -15,7 +15,7 @@ export default function Connect() {
   const router = useRouter();
   const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:3000/api/runQuery", {
+    const res = await fetch("/api/runQuery", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
