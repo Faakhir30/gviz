@@ -2,7 +2,7 @@ import { EdgeColor, NodeColor } from "@/app/utills/constants";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, res: NextResponse) {
-  const tablesQ:any=await fetch("http://localhost:3000/api/runQuery", {
+  const tablesQ:any=await fetch(process.env.URL+"/api/runQuery", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export async function GET(req: Request, res: NextResponse) {
   // Build a mapping of table names to their data
   let nodesData: any = {};
   for await (const tableName of tableNames) {
-     const d= await fetch("http://localhost:3000/api/runQuery", {
+     const d= await fetch(process.env.URL+"/api/runQuery", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export async function GET(req: Request, res: NextResponse) {
       });
     });
   }
-  const edgesDataQ = await fetch("http://localhost:3000/api/runQuery", {
+  const edgesDataQ = await fetch(process.env.URL+"/api/runQuery", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -29,7 +29,7 @@ export default function Connect() {
     }
     toast.success("Connected!");
     await delay(1000);
-    router.push("/");
+    router.push("/home");
   };
   return (
     <div className=" bg-primary-medium-light h-screen">
