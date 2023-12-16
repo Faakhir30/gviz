@@ -24,10 +24,10 @@ module.exports = {
           },
           colors: {
               //Site theme
-              'primary-light': 'hsl(0, 0%, 100%)',
-              'primary-medium-light': 'hsl(0, 0%, 92%)',
-              'primary-dark': 'hsl(0, 0%, 4%)',
-              'primary-medium-dark': 'hsl(0, 0%, 7%)',
+              'primary-light': '#F0ECE5',
+              'primary-medium-light': '#B6BBC4',
+              'primary-dark': '#161A30',
+              'primary-medium-dark': '#31304D',
               'dark-gray': 'hsla(0, 0%, 12%, 0.5)',
               'light-gray': 'hsla(0, 0%, 95%, 0.9)',
               'primary-dark-trasparent': 'hsla(0, 0%, 10%, 0.5)',

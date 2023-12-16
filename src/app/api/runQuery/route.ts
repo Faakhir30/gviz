@@ -8,9 +8,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
         console.log("ress: ", ress);
         return NextResponse.json(ress);
 
-    }catch(error){
-        console.error("Error executing query:", body["query"]);
+    }catch(error:any){
         console.error("Error details:", error);
-        throw error;
+        return NextResponse.json({errorMsg:error?.sqlMessage, status: error?.sqlState}) ;
     }
 }

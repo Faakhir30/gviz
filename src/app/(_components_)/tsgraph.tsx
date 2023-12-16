@@ -51,13 +51,12 @@ export default function TsGraph({
   };
   return (
     <VisGraph
-      style={{ width: "100%", height: "98%", zIndex: 1 , border: "1px solid #fff"}}
+      style={{ width: "100%", height: "100%", border: "1px solid #fff", borderRadius: "5px"}}
       graph={graph}
       options={options}
       events={events}
       getNetwork={(network: any) => {
-        //  if you want access to vis.js network api you can set the state in a parent component using this property
-        // console.log(network);
+        // console.log('network: ',network);
       }}
     />
   );

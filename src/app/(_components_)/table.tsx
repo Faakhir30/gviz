@@ -58,8 +58,8 @@ const Table = ({
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full align-middle">
               <div className="h-96 overflow-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="border-2 px-6 py-4 font-black uppercase dark:border-b-dark">
+                <table className="w-full rounded-xl border-b-dark text-left text-sm">
+                  <thead className="border-2 px-6 py-4 font-black uppercase border-b-dark">
                     <tr className="">
                       {displayCheckboxes && <th className="px-6 py-2"></th>}
                       {headers.map((header, index) => (
@@ -87,11 +87,11 @@ const Table = ({
                           }}
                           className={`${
                             obj === start
-                              ? "bg-green-950"
+                              ? "bg-green-300"
                               : obj === end
-                                ? "bg-red-950"
+                                ? "bg-red-300"
                                 : "bg-transparent"
-                          } cursor-pointer from-primary-dark hover:bg-gradient-to-r ${
+                          } cursor-pointer from-primary-dark hover:bg-dark-gray ${
                             selectedRows.includes(rowIndex) ? "bg-blue-100" : ""
                           }`}
                         >

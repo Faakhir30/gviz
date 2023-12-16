@@ -1,7 +1,7 @@
 import React from 'react'
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-mysql";
-import "ace-builds/src-noconflict/theme-twilight";
+import "ace-builds/src-noconflict/theme-textmate";
 import "ace-builds/src-noconflict/ext-language_tools";
 interface CodeEditorProps {
   value?: string;
@@ -15,13 +15,13 @@ const CodeEditor = ({value, onChange}:CodeEditorProps) => {
         placeholder="Run Queries"
         mode={"mysql"}
         style={{width: "100%", height: "100%"}}
-        theme="twilight"
+        theme="textmate"
         name="blah2"
         onLoad={onloadEditor}
         onChange={onChange}
         fontSize={20}
         showPrintMargin={true}
-        showGutter={true}
+        showGutter={false}
         highlightActiveLine={true}
         value={value}
         setOptions={{

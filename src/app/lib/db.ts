@@ -19,8 +19,6 @@ export async function query({ query, values }: QueryParams) {
     const [results] = await connection.execute(query, values);
     return results;
   } catch (error) {
-    console.error("Error executing query:", query);
-    console.error("Error details:", error);
     throw error;
   } finally {
     connection.release(); // Release the connection back to the pool

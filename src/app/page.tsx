@@ -6,8 +6,10 @@ import { delay } from "./utills/delay";
 import CodeEditor from "./(_components_)/codeEditor";
 import { Node, Edge } from "react-vis-graph-wrapper";
 import Table from "./(_components_)/table";
+import toast, { Toaster } from "react-hot-toast";
 import { IoIosClose } from "react-icons/io";
-import { query } from "./lib/db";
+import { SiGraphql } from "react-icons/si";
+
 export default function Home() {
   const [curOutput, setCurOutput] = useState("");
   const [curNodes, setCurNodes] = useState<Node[]>([]);
@@ -26,8 +28,8 @@ export default function Home() {
     setState(1);
     setSideView(!sideView);
   };
-  const [start, setStart] = useState<any>('{"id":1,"name":"faakhir"}');
-  const [end, setEnd] = useState<any>('{"id":2,"name":"sadiq"}');
+  const [start, setStart] = useState<any>();
+  const [end, setEnd] = useState<any>();
   async function apicalls() {
     const data = await (
       await fetch("http://localhost:3000/api/getData")
@@ -61,7 +63,23 @@ export default function Home() {
         )
       );
   }, [end]);
+  const clearColors = useCallback(async () => {
+    setCurNodes(
+      curNodes.map((n) =>
+        n.color === "#fff" || n.color === "#444"
+          ? { ...n, color: n.color }
+          : { ...n, color: "#aaa" }
+      )
+    );
+    setCurEdges(
+      curEdges.map((e) => {
+        return { ...e, color: "#aaa" };
+      })
+    );
+  }, [curEdges, curNodes]);
+
   const visualizeDijkstra = useCallback(async () => {
+    await clearColors();
     const firstNode = curNodes.find((n) => n.id === start);
     if (!firstNode) {
       alert("start node not found");
@@ -119,11 +137,18 @@ export default function Home() {
             )
           );
           await delay(300);
-          return visualizeCorrectDijkstraPath(defaultNodes);
+          setCurNodes(
+            curNodes.map((n) =>
+              n.id === toNode.id ? { ...n, color: "#fff" } : n
+            )
+          );
+          await delay(300);
+          return visualizeCorrectDijkstraPath(curNodes);
         }
         nodes.push(toNode);
       }
     }
+    toast.error("No path Found");
   }, [curEdges, curNodes, end, start]);
   const visualizeCorrectDijkstraPath = async (initialNodes: any) => {
     const path = dijkstra({ nodes: curNodes, edges: curEdges }, start, end);
@@ -148,60 +173,62 @@ export default function Home() {
     setCurEdges(defaultEdges);
   };
   const runQuery = async () => {
-    try{
-    const res = await fetch("http://localhost:3000/api/runQuery", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({query:queryy}),
-    });
-    const p=await res.json()
-    console.log(p)
-    await apicalls();
-    }catch(e){
-      console.log(e)
+    try {
+      const res = await fetch("http://localhost:3000/api/runQuery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: queryy }),
+      });
+      const p = await res.json();
+      if (p.errorMsg) {
+        toast.error(p.errorMsg);
+        return;
+      }
+      await apicalls();
+    } catch (e) {
+      console.log(e);
+      console.log("msg", e as any);
     }
   };
   return (
-    <main className="bg-primary-medium-dark">
-      <div className="flex w-full h-screen p-0 ">
-        <div className={`w-70 ${sideView && "opacity-50"}`}>
-          <div className="h-20 overflow-y-hidden">
-            <CodeEditor 
-              value={queryy}
-              onChange={(val:any) => setQuery(val)}
-            />
+    <main className="bg-primary-medium-light">
+      <div className="flex flex-col w-full h-screen p-0 ">
+        <Toaster />
+        <nav className="border-b-2 border-slate-600 bg-primary-light flex h-fit justify-between items-center">
+          <div className="flex text-3xl justify-center font-extrabold text-slate-600 items-center">
+            <SiGraphql className="m-2" />
+            <h1>SLQViz</h1>
           </div>
-
-          <div className="bg-primary-dark" style={{ height: "85vh" }}>
-            <button onClick={visualizeDijkstra}>Visualize Dijkstra</button>
-            <TsGraph
-              setCurOutput={setCurOutput}
-              nodes={curNodes}
-              edges={curEdges}
-            />
-          </div>
-        </div>
-        <div className="w-60">
-          <>
-            <div className="h-screen">
-              <div className="h-1/6">
-                <button className="p-2 bg-grey border-2 m-4" onClick={runQuery}>Run Query</button>
-                <button className="p-2 bg-grey border-2 m-4" onClick={showEnd}>Select End</button>
-                <button className="p-2 bg-grey border-2 m-4" onClick={showStart}>Select Start</button>
-              </div>
-            </div>
-            {sideView && data && (
-              <div className="absolute max-h-screen overflow-auto top-0 right-0 h-screen w-[70vw] animate-progressBar bg-primary-medium-dark">
-                <button
-                  className=" text-5xl"
-                  onClick={() => setSideView(false)}
-                >
-                  <IoIosClose />
-                </button>
-                <h1 className="font-extrabold text-center">TABLES</h1>
-                {Object.keys(data).map((table) => {
+          <button
+            className="rounded-lg bg-slate-600 p-2 border-2 m-4"
+            onClick={showEnd}
+          >
+            Select End
+          </button>
+          <button
+            className="rounded-lg bg-slate-600 p-2 border-2 m-4"
+            onClick={showStart}
+          >
+            Select Start
+          </button>
+          <button
+            className="rounded-lg bg-slate-600 p-2 border-2 m-4"
+            onClick={visualizeDijkstra}
+          >
+            Visualize
+          </button>
+        </nav>
+        <div className="">
+          {sideView && data && (
+            <div className="absolute text-3xl text-primary-dark rounded-xl mt-4 max-h-[80vh] overflow-auto left-[20%] w-[60vw] bg-primary-light z-10">
+              <button className="text-5xl" onClick={() => setSideView(false)}>
+                <IoIosClose />
+              </button>
+              <h1 className="font-extrabold text-center">TABLES</h1>
+              {Object.keys(data).map((table) => {
+                if (data[table].length > 0)
                   return (
                     <div key={table}>
                       <Table
@@ -218,10 +245,27 @@ export default function Home() {
                       />
                     </div>
                   );
-                })}
-              </div>
-            )}
-          </>
+              })}
+            </div>
+          )}
+        </div>
+        <div className={`grid h-full grid-cols-4 ${sideView && "opacity-50"}`}>
+          <div className="col-span-3">
+            <TsGraph
+              setCurOutput={setCurOutput}
+              nodes={curNodes}
+              edges={curEdges}
+            />
+          </div>
+          <div className="col-span-1 border-l-2 border-slate-600">
+            <CodeEditor value={queryy} onChange={setQuery} />
+            <button
+              className="absolute right-0 bottom-0 rounded-lg bg-slate-600 p-2 border-2 m-4"
+              onClick={runQuery}
+            >
+              Run Query
+            </button>
+          </div>
         </div>
       </div>
     </main>
