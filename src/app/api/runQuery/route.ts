@@ -49,6 +49,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
     }catch(error:any){
         console.error("Error details:", error);
-        return NextResponse.json({errorMsg:error?.sqlMessage, status: error?.sqlState, error:"failed"}) ;
+        return NextResponse.json({errorMsg:error?.sqlMessage, status: error?.sqlState, error, mystatus: "error"}) ;
     }
 }
