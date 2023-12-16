@@ -24,8 +24,8 @@ export default function Connect() {
     });
     const resdata = await res.json();
     console.log("resData: ",resdata)
-    if (resdata.status ==28000  || resdata.errorMsg) {
-      toast.error(resdata.errorMsg);
+    if (!resdata || !Array.isArray(resdata.data)) {
+      toast.error(resdata.errorMsg||"Error connecting to database");
       return;
     }
     toast.success("Connected!");
