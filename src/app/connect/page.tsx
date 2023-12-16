@@ -6,7 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { delay } from "../utills/delay";
 import { SiGraphql } from "react-icons/si";
 
-const page = () => {
+export default function Connect() {
   const [data, setData] = React.useState({
     host: "",
     database: "",
@@ -82,5 +82,3 @@ const page = () => {
     </div>
   );
 };
-
-export default page;
