@@ -23,6 +23,7 @@ export default function Connect() {
       body: JSON.stringify({ query: "show tables", poolInfo:data }),
     });
     const resdata = await res.json();
+    console.log("resData: ",resdata)
     if (resdata.status ==28000  || resdata.errorMsg) {
       toast.error(resdata.errorMsg);
       return;
