@@ -17,6 +17,7 @@ interface PoolConect {
 async function query({ query, values, poolInfo }: QueryParams) {
     let pool
     if(poolInfo){
+        console.log("poolInfo>>>>>>>>>:", poolInfo)
         pool = mysql.createPool(poolInfo);
     }else{
         pool= mysql.createPool({
@@ -28,7 +29,7 @@ async function query({ query, values, poolInfo }: QueryParams) {
     }
 
   const connection = await pool.getConnection();
-  
+  console.log("connection>>>" ,connection)
   try {
     const [results] = await connection.execute(query, values);
     return results;
@@ -43,11 +44,11 @@ export async function POST(req: NextRequest, res: NextResponse) {
     const body:any = await req.json();
     try{
         const ress = await query({query: body["query"].replace("\n", " "), poolInfo: body["poolInfo"]});
-        console.log("ress: ", ress);
-        return NextResponse.json({data:ress});
+        console.log("ress:>>>>>>> ", ress);
+        return NextResponse.json({data:ress, status: "success"});
 
     }catch(error:any){
         console.error("Error details:", error);
-        return NextResponse.json({errorMsg:error?.sqlMessage, status: error?.sqlState}) ;
+        return NextResponse.json({errorMsg:error?.sqlMessage, status: error?.sqlState, error:"failed"}) ;
     }
 }
