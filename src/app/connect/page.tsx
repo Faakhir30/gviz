@@ -1,7 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { poolConect } from "../lib/db";
 import toast, { Toaster } from "react-hot-toast";
 import { delay } from "../utills/delay";
 import { SiGraphql } from "react-icons/si";
@@ -16,16 +15,23 @@ export default function Connect() {
   const router = useRouter();
   const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const res = await poolConect(data);
-    if(res.status === 200) {
-      toast.success("Connected to database");
-      await delay(1000);
-      router.push("/");}
-    else {
-      toast.error("Error connecting to database");
-      console.log(res)
+    const res = await fetch("http://localhost:3000/api/runQuery", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: "show tables", poolInfo:data }),
+    });
+    const resdata = await res.json();
+    console.log(resdata)
+    if (resdata.error) {
+      toast.error(resdata.error);
+      return;
     }
-    };
+    toast.success("Connected!");
+    await delay(1000);
+    // router.push("/");
+  };
   return (
     <div className=" bg-primary-medium-light h-screen">
       {/* form for database connection */}

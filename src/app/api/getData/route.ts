@@ -1,9 +1,15 @@
-import { query } from "@/app/lib/db";
 import { EdgeColor, NodeColor } from "@/app/utills/constants";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, res: NextResponse) {
-  const tables: any = await query({ query: "show tables" });
+  const tablesQ:any=await fetch("http://localhost:3000/api/runQuery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: "show tables" }),
+      }).then((res) => res.json());
+  const tables = tablesQ.data
   let tableNames = [];
   if (tables) {
     tableNames = tables.map((table: any) => Object.values(table)[0]);
@@ -11,10 +17,17 @@ export async function GET(req: Request, res: NextResponse) {
 
   // Build a mapping of table names to their data
   let nodesData: any = {};
-  for (const tableName of tableNames) {
-    nodesData[tableName] = await query({
-      query: `select * from ${tableName}`,
-    });
+  for await (const tableName of tableNames) {
+     const d= await fetch("http://localhost:3000/api/runQuery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `select * from ${tableName}`,
+          }),
+      }).then((res) => res.json());      
+      nodesData[tableName]=d.data;
   }
 
   let nodes: any = [];
@@ -28,11 +41,17 @@ export async function GET(req: Request, res: NextResponse) {
       });
     });
   }
+  const edgesDataQ = await fetch("http://localhost:3000/api/runQuery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          query: `SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = 'gviz0' AND REFERENCED_TABLE_NAME IS NOT NULL;`,
 
-  const edgesData: any = await query({
-    query: `SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = 'gviz0' AND REFERENCED_TABLE_NAME IS NOT NULL;`,
-  });
-
+         }),
+      }).then((res) => res.json());
+  const edgesData = edgesDataQ.data
   let edges: any = [];
 
   // Define a helper function to get edges for a specific node
