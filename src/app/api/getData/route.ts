@@ -26,11 +26,11 @@ export async function GET(req: Request, res: NextResponse) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          query: `select * from ${tableName}`,
+          query: `select SQL_NO_CACHE * from ${tableName}`,
           }),
       }).then((res) => res.json())
       .catch((err) => console.log(JSON.stringify(err)))
-
+      console.log("d>>>>: ", d)
       nodesData[tableName]=d?.data || [];
   }
 
@@ -51,7 +51,7 @@ export async function GET(req: Request, res: NextResponse) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ 
-          query: `SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = 'gviz0' AND REFERENCED_TABLE_NAME IS NOT NULL;`,
+          query: `SELECT SQL_NO_CACHE TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = 'gviz0' AND REFERENCED_TABLE_NAME IS NOT NULL;`,
 
          }),
       }).then((res) => res.json())

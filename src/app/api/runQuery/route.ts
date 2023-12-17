@@ -29,7 +29,6 @@ async function query({ query, values, poolInfo }: QueryParams) {
     }
 
   const connection = await pool.getConnection();
-  console.log("connection>>>" ,connection)
   try {
     const [results] = await connection.execute(query, values);
     return results;

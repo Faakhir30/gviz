@@ -9,7 +9,13 @@ import Table from "../(_components_)/table";
 import toast from "react-hot-toast";
 import { IoIosClose } from "react-icons/io";
 import { SiGraphql } from "react-icons/si";
-import { EdgeColor, EndColor, NodeColor, SelectColor, StartColor } from "../utills/constants";
+import {
+  EdgeColor,
+  EndColor,
+  NodeColor,
+  SelectColor,
+  StartColor,
+} from "../utills/constants";
 
 export default function Home() {
   const [curOutput, setCurOutput] = useState("");
@@ -48,15 +54,131 @@ export default function Home() {
   const [start, setStart] = useState<any>();
   const [end, setEnd] = useState<any>();
   async function apicalls() {
-    const data = await (
-      await fetch("/api/getData")
-    ).json();
-    setData(data.data);
-    setCurNodes(data.nodes);
-    setCurEdges(data.edges);
-    setOtherEdges(data.undirectedEdges);
-    setDefaultNodes(data.nodes);
-    setDefaultEdges(data.edges);
+    const tablesQ: any = await fetch( "/api/runQuery", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: "show tables" }),
+    })
+      .then((res) => res.json())
+      .catch((err) => console.log(JSON.stringify(err)));
+    const tables = tablesQ?.data || [];
+    let tableNames = [];
+    if (tables) {
+      tableNames = tables.map((table: any) => Object.values(table)[0]);
+    }
+
+    // Build a mapping of table names to their data
+    let nodesData: any = {};
+    for await (const tableName of tableNames) {
+      const d = await fetch( "/api/runQuery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `select SQL_NO_CACHE * from ${tableName}`,
+        }),
+      })
+        .then((res) => res.json())
+        .catch((err) => console.log(JSON.stringify(err)));
+      console.log("d>>>>: ", d);
+      nodesData[tableName] = d?.data || [];
+    }
+
+    let nodes: any = [];
+    for (const tableName of Object.keys(nodesData)) {
+      nodesData[tableName].map((node: any) => {
+        nodes.push({
+          id: JSON.stringify(node, Object.keys(node).sort()),
+          label: tableName,
+          title: JSON.stringify(node),
+          color: NodeColor,
+        });
+      });
+    }
+    const edgesDataQ = await fetch( "/api/runQuery", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `SELECT SQL_NO_CACHE TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE CONSTRAINT_SCHEMA = 'gviz0' AND REFERENCED_TABLE_NAME IS NOT NULL;`,
+      }),
+    })
+      .then((res) => res.json())
+      .catch((err) => console.log(JSON.stringify(err)));
+
+    const edgesData = edgesDataQ?.data || [];
+    let edges: any = [];
+
+    // Define a helper function to get edges for a specific node
+    function getEdgesForNode(tableName: string, node: any) {
+      edgesData.forEach((edge: any) => {
+        if (edge.TABLE_NAME === tableName) {
+          const referencedTableName = edge.REFERENCED_TABLE_NAME;
+          const referencedColumnName = edge.REFERENCED_COLUMN_NAME;
+          const referencedValue = node[edge.COLUMN_NAME];
+
+          // Find matching nodes in the referenced table
+          if (nodesData[referencedTableName]) {
+            const matchingNodes = nodesData[referencedTableName].filter(
+              (referencedNode: any) => {
+                return referencedNode[referencedColumnName] === referencedValue;
+              }
+            );
+
+            // Create edges from matching nodes
+            edges = edges.concat(
+              matchingNodes.map((matchingNode: any) => ({
+                from: JSON.stringify(node, Object.keys(node).sort()),
+                to: JSON.stringify(
+                  matchingNode,
+                  Object.keys(matchingNode).sort()
+                ),
+                color: EdgeColor,
+                width: 2,
+              }))
+            );
+          }
+        }
+      });
+    }
+
+    // Use Promise.all to await all the getEdgesForNode calls
+    const promises = Object.keys(nodesData).map(async (tableName) => {
+      for (const node of nodesData[tableName]) {
+        getEdgesForNode(tableName, node);
+      }
+    });
+
+    // Wait for all promises to complete
+    await Promise.all(promises);
+    const undirectedEdges = JSON.parse(JSON.stringify(edges));
+    // Add reverse edges
+    edges = edges.concat(
+      edges.map((edge: any) => {
+        return {
+          from: edge.to,
+          to: edge.from,
+          color: EdgeColor,
+          width: 2,
+        };
+      })
+    );
+    let graphData = {
+      nodes,
+      edges: edges,
+      data: nodesData,
+      undirectedEdges,
+    };
+    setData(graphData.data);
+    setCurNodes(graphData.nodes);
+    setCurEdges(graphData.edges);
+    setOtherEdges(graphData.undirectedEdges);
+    setDefaultNodes(graphData.nodes);
+    setDefaultEdges(graphData.edges);
   }
   useEffect(() => {
     apicalls();
@@ -225,6 +347,7 @@ export default function Home() {
         toast.success("Query Executed");
         return;
       }
+      toast.success("Query Executed");
       await apicalls();
     } catch (e) {
       console.log(e);
@@ -232,95 +355,95 @@ export default function Home() {
     }
   };
   return (
-      <div className="flex flex-col w-full h-screen p-0 ">
-        <nav className="border-b-2 border-slate-600 bg-primary-light flex h-fit justify-between items-center">
-          <div className="flex text-3xl justify-center font-extrabold text-slate-600 items-center">
-            <SiGraphql className="m-2" />
-            <h1>SLQViz</h1>
-          </div>
-          <button
-            className="rounded-lg bg-slate-600 p-2 border-2 m-4"
-            onClick={clearColors}
-          >
-            Reset
-          </button>
-          <button
-            className="rounded-lg bg-slate-600 p-2 border-2 m-4"
-            onClick={showStart}
-          >
-            Select Start
-          </button>
-          <button
-            className="rounded-lg bg-slate-600 p-2 border-2 m-4"
-            onClick={showEnd}
-          >
-            Select End
-          </button>
-          <div
-            onClick={() => setIsDirected(!isDirected)}
-            className="cursor-pointer flex bg-slate-600 p-2 m-4 border-2 rounded-lg"
-          >
-            <h4>Directed</h4>
-            <input type="checkbox" className="mx-2" checked={isDirected} />
-          </div>
-          <button
-            className="rounded-lg bg-slate-600 p-2 border-2 m-4"
-            onClick={visualizeDijkstra}
-          >
-            Visualize
-          </button>
-        </nav>
-        <div className="">
-          {sideView && data && (
-            <div className="absolute text-3xl text-primary-dark rounded-xl mt-4 max-h-[80vh] overflow-auto left-[20%] w-[60vw] bg-primary-light z-10">
-              <button className="text-5xl" onClick={() => setSideView(false)}>
-                <IoIosClose />
-              </button>
-              <h1 className="font-extrabold text-center">TABLES</h1>
-              {Object.keys(data).map((table) => {
-                if (data[table].length > 0)
-                  return (
-                    <div key={table}>
-                      <Table
-                        title={table}
-                        start={start}
-                        end={end}
-                        setEnd={setEnd}
-                        setStart={setStart}
-                        state={state}
-                        headers={Object.keys(data[table][0])}
-                        data={data[table].map((row: any) => Object.values(row))}
-                        displayCheckboxes={false}
-                        className=" w-5/6 text-left text-sm"
-                      />
-                    </div>
-                  );
-              })}
-            </div>
-          )}
+    <div className="flex flex-col w-full h-screen p-0 ">
+      <nav className="border-b-2 border-slate-600 bg-primary-light flex h-fit justify-between items-center">
+        <div className="flex text-3xl justify-center font-extrabold text-slate-600 items-center">
+          <SiGraphql className="m-2" />
+          <h1>SLQViz</h1>
         </div>
-        <div className={`grid h-full grid-cols-4 ${sideView && "opacity-50"}`}>
-          <div className="relative col-span-3">
-            <TsGraph
-              setCurOutput={setCurOutput}
-              nodes={curNodes}
-              edges={curEdges}
-            />
-            <div className="absolute top-2 left-2 text-primary-dark">
-              <h3>Nodes Visited: {visitedCount}</h3>
-              <h3>Correct Path Length: {correctCount}</h3>
-            </div>
-          </div>
-          <div className="col-span-1 border-l-2 border-slate-600">
-            <CodeEditor value={queryy} onChange={setQuery} />
-            <button
-              className="absolute right-0 bottom-0 rounded-lg bg-slate-600 p-2 border-2 m-4"
-              onClick={runQuery}
-            >
-              Run Query
+        <button
+          className="rounded-lg bg-slate-600 p-2 border-2 m-4"
+          onClick={clearColors}
+        >
+          Reset
+        </button>
+        <button
+          className="rounded-lg bg-slate-600 p-2 border-2 m-4"
+          onClick={showStart}
+        >
+          Select Start
+        </button>
+        <button
+          className="rounded-lg bg-slate-600 p-2 border-2 m-4"
+          onClick={showEnd}
+        >
+          Select End
+        </button>
+        <div
+          onClick={() => setIsDirected(!isDirected)}
+          className="cursor-pointer flex bg-slate-600 p-2 m-4 border-2 rounded-lg"
+        >
+          <h4>Directed</h4>
+          <input type="checkbox" className="mx-2" checked={isDirected} />
+        </div>
+        <button
+          className="rounded-lg bg-slate-600 p-2 border-2 m-4"
+          onClick={visualizeDijkstra}
+        >
+          Visualize
+        </button>
+      </nav>
+      <div className="">
+        {sideView && data && (
+          <div className="absolute text-3xl text-primary-dark rounded-xl mt-4 max-h-[80vh] overflow-auto left-[20%] w-[60vw] bg-primary-light z-10">
+            <button className="text-5xl" onClick={() => setSideView(false)}>
+              <IoIosClose />
             </button>
+            <h1 className="font-extrabold text-center">TABLES</h1>
+            {Object.keys(data).map((table) => {
+              if (data[table].length > 0)
+                return (
+                  <div key={table}>
+                    <Table
+                      title={table}
+                      start={start}
+                      end={end}
+                      setEnd={setEnd}
+                      setStart={setStart}
+                      state={state}
+                      headers={Object.keys(data[table][0])}
+                      data={data[table].map((row: any) => Object.values(row))}
+                      displayCheckboxes={false}
+                      className=" w-5/6 text-left text-sm"
+                    />
+                  </div>
+                );
+            })}
           </div>
+        )}
+      </div>
+      <div className={`grid h-full grid-cols-4 ${sideView && "opacity-50"}`}>
+        <div className="relative col-span-3">
+          <TsGraph
+            setCurOutput={setCurOutput}
+            nodes={curNodes}
+            edges={curEdges}
+          />
+          <div className="absolute top-2 left-2 text-primary-dark">
+            <h3>Nodes Visited: {visitedCount}</h3>
+            <h3>Correct Path Length: {correctCount}</h3>
+          </div>
+        </div>
+        <div className="col-span-1 border-l-2 border-slate-600">
+          <CodeEditor value={queryy} onChange={setQuery} />
+          <button
+            className="absolute right-0 bottom-0 rounded-lg bg-slate-600 p-2 border-2 m-4"
+            onClick={runQuery}
+          >
+            Run Query
+          </button>
         </div>
       </div>
+    </div>
   );
 }
