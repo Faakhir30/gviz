@@ -359,7 +359,7 @@ export default function Home() {
       <nav className="border-b-2 border-slate-600 bg-primary-light flex h-fit justify-between items-center">
         <div className="flex text-3xl justify-center font-extrabold text-slate-600 items-center">
           <SiGraphql className="m-2" />
-          <h1>SLQViz</h1>
+          <h1>SQLViz</h1>
         </div>
         <button
           className="rounded-lg bg-slate-600 p-2 border-2 m-4"

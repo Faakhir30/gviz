@@ -39,7 +39,7 @@ export default function Connect() {
         <div className="flex flex-col items-center justify-center bg-white p-8 rounded-lg shadow-lg">
           <div className="flex font-extrabold text-4xl text-gray-800">
             <SiGraphql className="m-2" />
-            <h1>SLQViz</h1>
+            <h1>SQLViz</h1>
           </div>
           <h1 className="text-2xl font-bold text-gray-800">
             Connect to Database
